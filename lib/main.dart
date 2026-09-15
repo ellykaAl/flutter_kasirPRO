@@ -21,7 +21,6 @@ class PosApp extends StatelessWidget {
         ),
         scaffoldBackgroundColor: const Color(0xFFF8FAFC),
       ),
-      // Halaman pertama yang dibuka adalah Login
       home: const LoginPage(),
     );
   }

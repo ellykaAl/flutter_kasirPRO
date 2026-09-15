@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'user_model.dart';
+import 'signup.dart';
 import 'home.dart';
 
 class LoginPage extends StatefulWidget {
@@ -13,24 +15,25 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _pinController = TextEditingController();
 
   void _handleLogin() {
-    String namaKasir = _kasirNameController.text.trim();
+    String nama = _kasirNameController.text.trim();
     String pin = _pinController.text.trim();
 
-    if (namaKasir.isNotEmpty && pin.isNotEmpty) {
-      // Pindah ke Halaman Home dan hapus halaman Login dari stack/riwayat
+    try {
+      UserAccount user = registeredUsers.firstWhere(
+        (u) => u.nama.toLowerCase() == nama.toLowerCase() && u.pin == pin,
+      );
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => HomePage(namaKasir: namaKasir),
+          builder: (context) => HomePage(user: user),
         ),
       );
-    } else {
-      // Tampilkan pesan kesalahan jika ada inputan yang kosong
+    } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Nama Kasir dan PIN/ID wajib diisi!'),
+          content: Text('Nama Kasir atau PIN salah / belum terdaftar!'),
           backgroundColor: Colors.redAccent,
-          behavior: SnackBarBehavior.floating,
         ),
       );
     }
@@ -39,92 +42,147 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(28.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Logo/Ikon POS
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF0F172A).withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  Icons.point_of_sale,
-                  size: 64,
-                  color: Color(0xFF0F172A),
-                ),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            // Ganti link di bawah jika ingin menggunakan gambar lain
+            image: const NetworkImage(
+              'https://images.pexels.com/photos/32758358/pexels-photo-32758358.jpeg',
+            ),
+            fit: BoxFit.cover,
+            colorFilter: ColorFilter.mode(
+              Colors.black.withOpacity(0.35), // Layer redup agar background tidak terlalu mencolok
+              BlendMode.darken,
+            ),
+          ),
+        ),
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
+            child: Card(
+              elevation: 10,
+              shadowColor: Colors.black54,
+              color: Colors.white.withOpacity(0.93), // Kartu semi-transparan yang elegan
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
               ),
-              const SizedBox(height: 24),
-              const Text(
-                'POS KASIR SYSTEM',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.2,
-                  color: Color(0xFF0F172A),
-                ),
-              ),
-              const SizedBox(height: 6),
-              const Text(
-                'Masuk untuk memulai shift kerja',
-                style: TextStyle(color: Colors.grey),
-              ),
-              const SizedBox(height: 32),
-
-              // Form Input Nama Kasir
-              TextField(
-                controller: _kasirNameController,
-                decoration: const InputDecoration(
-                  labelText: 'Nama Kasir',
-                  hintText: 'Contoh: Budi',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.person_outline),
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              // Form Input PIN / ID
-              TextField(
-                controller: _pinController,
-                obscureText: true,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'PIN / ID Kasir',
-                  hintText: 'Masukkan 4 digit PIN',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.lock_outline),
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              // Tombol Mulai Shift
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton.icon(
-                  onPressed: _handleLogin,
-                  icon: const Icon(Icons.login, color: Colors.white),
-                  label: const Text(
-                    'MULAI SHIFT',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF0F172A).withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.point_of_sale,
+                        size: 56,
+                        color: Color(0xFF0F172A),
+                      ),
                     ),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0F172A),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                    const SizedBox(height: 20),
+                    const Text(
+                      'POS KASIR SYSTEM',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.2,
+                        color: Color(0xFF0F172A),
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 6),
+                    const Text(
+                      'Masuk untuk memulai shift kerja',
+                      style: TextStyle(color: Colors.black54),
+                    ),
+                    const SizedBox(height: 28),
+
+                    TextField(
+                      controller: _kasirNameController,
+                      decoration: const InputDecoration(
+                        labelText: 'Nama Kasir',
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.person_outline),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    TextField(
+                      controller: _pinController,
+                      obscureText: true,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'PIN / ID Kasir',
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.lock_outline),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton.icon(
+                        onPressed: _handleLogin,
+                        icon: const Icon(Icons.login, color: Colors.white),
+                        label: const Text(
+                          'MULAI SHIFT',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF0F172A),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          'Belum punya akun? ',
+                          style: TextStyle(color: Colors.black87),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const SignUpPage(),
+                              ),
+                            );
+                          },
+                          child: const Text(
+                            'Daftar Sekarang',
+                            style: TextStyle(
+                              color: Color(0xFF0F172A),
+                              fontWeight: FontWeight.bold,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-            ],
+            ),
           ),
         ),
       ),

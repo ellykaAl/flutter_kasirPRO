@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'user_model.dart';
 import 'login.dart';
 
-// Model Data Produk
 class Product {
   final String id;
   final String name;
@@ -21,16 +21,15 @@ class Product {
 }
 
 class HomePage extends StatefulWidget {
-  final String namaKasir;
+  final UserAccount user;
 
-  const HomePage({super.key, required this.namaKasir});
+  const HomePage({super.key, required this.user});
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  // Master Data Produk Sederhana
   final List<Product> _products = [
     Product(id: '1', name: 'Kopi Espresso', price: 18000, category: 'Minuman', icon: Icons.local_cafe),
     Product(id: '2', name: 'Kopi Latte', price: 24000, category: 'Minuman', icon: Icons.local_cafe),
@@ -42,40 +41,22 @@ class _HomePageState extends State<HomePage> {
 
   String _selectedCategory = 'Semua';
 
-  // Format angka ke format rupiah sederhana (misal: 25000 -> Rp 25.000)
   String _formatRupiah(int number) {
     return 'Rp ${number.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}';
   }
 
-  // Hitung total seluruh item
-  int get _totalItems {
-    return _products.fold(0, (sum, item) => sum + item.quantity);
-  }
+  int get _totalItems => _products.fold(0, (sum, item) => sum + item.quantity);
+  int get _totalPrice => _products.fold(0, (sum, item) => sum + (item.price * item.quantity));
 
-  // Hitung total harga transaksi
-  int get _totalPrice {
-    return _products.fold(0, (sum, item) => sum + (item.price * item.quantity));
-  }
-
-  // Filter list produk berdasarkan kategori
   List<Product> get _filteredProducts {
-    if (_selectedCategory == 'Semua') {
-      return _products;
-    }
+    if (_selectedCategory == 'Semua') return _products;
     return _products.where((p) => p.category == _selectedCategory).toList();
   }
 
-  void _incrementQty(Product product) {
-    setState(() {
-      product.quantity++;
-    });
-  }
-
+  void _incrementQty(Product product) => setState(() => product.quantity++);
   void _decrementQty(Product product) {
     setState(() {
-      if (product.quantity > 0) {
-        product.quantity--;
-      }
+      if (product.quantity > 0) product.quantity--;
     });
   }
 
@@ -86,33 +67,23 @@ class _HomePageState extends State<HomePage> {
       }
     });
   }
-
-  void _processPayment() {
-    if (_totalItems == 0) return;
-
+void _processPayment() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Row(
-          children: [
-            Icon(Icons.receipt_long, color: Color(0xFF0F172A)),
-            SizedBox(width: 8),
-            Text('Ringkasan Pembayaran'),
-          ],
-        ),
+        title: const Text('Konfirmasi Pembayaran'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Kasir: ${widget.namaKasir}'),
-            const Divider(),
-            const SizedBox(height: 4),
-            Text('Total Barang : $_totalItems pcs'),
-            const SizedBox(height: 4),
+            Text('Kasir: ${widget.user.nama}'),
+            const SizedBox(height: 8),
             Text(
-              'Total Tagihan : ${_formatRupiah(_totalPrice)}',
+              'Total: ${_formatRupiah(_totalPrice)}',
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
+            const SizedBox(height: 12),
+            const Text('Apakah Anda yakin ingin memproses transaksi ini?'),
           ],
         ),
         actions: [
@@ -126,7 +97,7 @@ class _HomePageState extends State<HomePage> {
               _resetOrder();
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Transaksi Berhasil Disimpan & Dicetak!'),
+                  content: Text('Pembayaran Berhasil!'),
                   backgroundColor: Colors.green,
                   behavior: SnackBarBehavior.floating,
                 ),
@@ -142,38 +113,31 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _logout() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const LoginPage()),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Mesin Kasir',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
+        title: const Text('Mesin Kasir', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         backgroundColor: const Color(0xFF0F172A),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh, color: Colors.white),
-            tooltip: 'Reset Pesanan',
             onPressed: _resetOrder,
           ),
           IconButton(
             icon: const Icon(Icons.logout, color: Colors.white),
-            tooltip: 'Selesai Shift',
-            onPressed: _logout,
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const LoginPage()),
+              );
+            },
           ),
         ],
       ),
       body: Column(
         children: [
-          // Banner Status Kasir
+          // Header Status Kasir dengan Foto Profil
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             color: Colors.blueGrey.shade50,
@@ -182,10 +146,18 @@ class _HomePageState extends State<HomePage> {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.account_circle, size: 22, color: Color(0xFF0F172A)),
-                    const SizedBox(width: 8),
+                    // Foto Profil Kasir (Mengikuti Akun Login)
+                    CircleAvatar(
+                      radius: 16,
+                      backgroundColor: const Color(0xFF0F172A).withOpacity(0.1),
+                      backgroundImage: NetworkImage(widget.user.imageUrl),
+                      child: widget.user.imageUrl.isEmpty
+                          ? const Icon(Icons.person, size: 18, color: Color(0xFF0F172A))
+                          : null,
+                    ),
+                    const SizedBox(width: 10),
                     Text(
-                      'Kasir: ${widget.namaKasir}',
+                      'Kasir: ${widget.user.nama}',
                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                     ),
                   ],
@@ -205,7 +177,7 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
 
-          // Chips Filter Kategori
+          // Chips Kategori
           Container(
             height: 50,
             padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
@@ -224,9 +196,7 @@ class _HomePageState extends State<HomePage> {
                       fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                     ),
                     onSelected: (bool selected) {
-                      setState(() {
-                        _selectedCategory = category;
-                      });
+                      setState(() => _selectedCategory = category);
                     },
                   ),
                 );
@@ -234,7 +204,7 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
 
-          // Daftar Produk
+          // List Produk
           Expanded(
             child: ListView.separated(
               padding: const EdgeInsets.all(12),
@@ -253,7 +223,6 @@ class _HomePageState extends State<HomePage> {
                     padding: const EdgeInsets.all(12.0),
                     child: Row(
                       children: [
-                        // Ikon Kategori Produk
                         Container(
                           width: 48,
                           height: 48,
@@ -264,24 +233,16 @@ class _HomePageState extends State<HomePage> {
                           child: Icon(product.icon, color: const Color(0xFF0F172A)),
                         ),
                         const SizedBox(width: 12),
-                        // Nama & Harga Produk
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                product.name,
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                              ),
+                              Text(product.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
                               const SizedBox(height: 2),
-                              Text(
-                                _formatRupiah(product.price),
-                                style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
-                              ),
+                              Text(_formatRupiah(product.price), style: TextStyle(color: Colors.grey.shade700, fontSize: 13)),
                             ],
                           ),
                         ),
-                        // Control Tambah / Kurang Kuantitas
                         Row(
                           children: [
                             IconButton(
@@ -289,14 +250,7 @@ class _HomePageState extends State<HomePage> {
                               icon: const Icon(Icons.remove_circle_outline),
                               color: product.quantity > 0 ? Colors.redAccent : Colors.grey.shade400,
                             ),
-                            Container(
-                              constraints: const BoxConstraints(minWidth: 24),
-                              alignment: Alignment.center,
-                              child: Text(
-                                '${product.quantity}',
-                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                              ),
-                            ),
+                            Text('${product.quantity}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                             IconButton(
                               onPressed: () => _incrementQty(product),
                               icon: const Icon(Icons.add_circle_outline),
@@ -314,17 +268,12 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
 
-      // Ringkasan Pembayaran & Tombol Bayar
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.06),
-              blurRadius: 10,
-              offset: const Offset(0, -4),
-            ),
+            BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 10, offset: const Offset(0, -4)),
           ],
         ),
         child: SafeArea(
@@ -335,34 +284,19 @@ class _HomePageState extends State<HomePage> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    '$_totalItems Item Dipilih',
-                    style: const TextStyle(color: Colors.grey, fontSize: 12),
-                  ),
-                  Text(
-                    _formatRupiah(_totalPrice),
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF0F172A),
-                    ),
-                  ),
+                  Text('$_totalItems Item Dipilih', style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                  Text(_formatRupiah(_totalPrice), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
                 ],
               ),
               ElevatedButton.icon(
                 onPressed: _totalItems > 0 ? _processPayment : null,
                 icon: const Icon(Icons.payment, color: Colors.white),
-                label: const Text(
-                  'PROSES BAYAR',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white),
-                ),
+                label: const Text('PROSES BAYAR', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF0F172A),
                   disabledBackgroundColor: Colors.grey.shade300,
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                 ),
               ),
             ],
