@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'user_model.dart';
 import 'login.dart';
+import 'profile_page.dart';
 
 class Product {
   final String id;
   final String name;
   final int price;
   final String category;
-  final IconData icon;
+  final String imageAsset;
   int quantity;
 
   Product({
@@ -15,7 +16,7 @@ class Product {
     required this.name,
     required this.price,
     required this.category,
-    required this.icon,
+    required this.imageAsset,
     this.quantity = 0,
   });
 }
@@ -30,13 +31,14 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  // Daftar Produk yang Menggunakan Asset Gambar Lokal
   final List<Product> _products = [
-    Product(id: '1', name: 'Kopi Espresso', price: 18000, category: 'Minuman', icon: Icons.local_cafe),
-    Product(id: '2', name: 'Kopi Latte', price: 24000, category: 'Minuman', icon: Icons.local_cafe),
-    Product(id: '3', name: 'Es Teh Manis', price: 6000, category: 'Minuman', icon: Icons.local_drink),
-    Product(id: '4', name: 'Roti Bakar Cokelat', price: 15000, category: 'Makanan', icon: Icons.bakery_dining),
-    Product(id: '5', name: 'Nasi Goreng Spesial', price: 28000, category: 'Makanan', icon: Icons.rice_bowl),
-    Product(id: '6', name: 'Kentang Goreng', price: 12000, category: 'Snack', icon: Icons.fastfood),
+    Product(id: '1', name: 'Kopi Espresso', price: 18000, category: 'Minuman', imageAsset: 'assets/espresso.jpg'),
+    Product(id: '2', name: 'Kopi Latte', price: 24000, category: 'Minuman', imageAsset: 'assets/latte.jpg'),
+    Product(id: '3', name: 'Es Teh Manis', price: 6000, category: 'Minuman', imageAsset: 'assets/es_teh.jpg'),
+    Product(id: '4', name: 'Roti Bakar Cokelat', price: 15000, category: 'Makanan', imageAsset: 'assets/roti_bakar.jpg'),
+    Product(id: '5', name: 'Nasi Goreng Spesial', price: 28000, category: 'Makanan', imageAsset: 'assets/nasi_goreng.jpg'),
+    Product(id: '6', name: 'Kentang Goreng', price: 12000, category: 'Snack', imageAsset: 'assets/kentang_goreng.jpg'),
   ];
 
   String _selectedCategory = 'Semua';
@@ -67,7 +69,8 @@ class _HomePageState extends State<HomePage> {
       }
     });
   }
-void _processPayment() {
+
+  void _processPayment() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -137,30 +140,42 @@ void _processPayment() {
       ),
       body: Column(
         children: [
-          // Header Status Kasir dengan Foto Profil
+          // Header Status Kasir
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             color: Colors.blueGrey.shade50,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    // Foto Profil Kasir (Mengikuti Akun Login)
-                    CircleAvatar(
-                      radius: 16,
-                      backgroundColor: const Color(0xFF0F172A).withOpacity(0.1),
-                      backgroundImage: NetworkImage(widget.user.imageUrl),
-                      child: widget.user.imageUrl.isEmpty
-                          ? const Icon(Icons.person, size: 18, color: Color(0xFF0F172A))
-                          : null,
+                InkWell(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ProfilePage(user: widget.user),
+                      ),
+                    );
+                  },
+                  borderRadius: BorderRadius.circular(8),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 16,
+                          backgroundColor: const Color(0xFF0F172A).withOpacity(0.1),
+                          backgroundImage: AssetImage(widget.user.imageAsset),
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          'Kasir: ${widget.user.nama}',
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(Icons.chevron_right, size: 18, color: Colors.grey),
+                      ],
                     ),
-                    const SizedBox(width: 10),
-                    Text(
-                      'Kasir: ${widget.user.nama}',
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                    ),
-                  ],
+                  ),
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -177,7 +192,7 @@ void _processPayment() {
             ),
           ),
 
-          // Chips Kategori
+          // Category Chips
           Container(
             height: 50,
             padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
@@ -204,7 +219,7 @@ void _processPayment() {
             ),
           ),
 
-          // List Produk
+          // List Produk dengan Gambar Asset
           Expanded(
             child: ListView.separated(
               padding: const EdgeInsets.all(12),
@@ -223,14 +238,23 @@ void _processPayment() {
                     padding: const EdgeInsets.all(12.0),
                     child: Row(
                       children: [
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF0F172A).withOpacity(0.08),
-                            borderRadius: BorderRadius.circular(8),
+                        // WIDGET GAMBAR DARI ASSET
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.asset(
+                            product.imageAsset,
+                            width: 52,
+                            height: 52,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                width: 52,
+                                height: 52,
+                                color: const Color(0xFF0F172A).withOpacity(0.1),
+                                child: const Icon(Icons.fastfood, color: Color(0xFF0F172A)),
+                              );
+                            },
                           ),
-                          child: Icon(product.icon, color: const Color(0xFF0F172A)),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
