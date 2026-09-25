@@ -13,6 +13,15 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _pinController = TextEditingController();
   final TextEditingController _imageController = TextEditingController();
 
+  @override
+  void dispose() {
+    // Membersihkan controller untuk mencegah memory leak
+    _nameController.dispose();
+    _pinController.dispose();
+    _imageController.dispose();
+    super.dispose();
+  }
+
   void _handleSignUp() {
     String nama = _nameController.text.trim();
     String pin = _pinController.text.trim();
@@ -37,10 +46,10 @@ class _SignUpPageState extends State<SignUpPage> {
     // Simpan data ke memori (merujuk pada list dummyUsers di user_model.dart)
     dummyUsers.add(
       UserAccount(
-        username: nama.toLowerCase().replaceAll(' ', ''), // otomatis buat username
-        password: pin, // pin digunakan sebagai password
+        username: nama.toLowerCase().replaceAll(' ', ''), // Otomatis buat username
+        password: pin, // PIN digunakan sebagai password
         nama: nama,
-        role: 'Kasir', // set default role
+        role: 'Kasir', // Set default role
         imageAsset: imageInput,
       ),
     );
@@ -66,7 +75,7 @@ class _SignUpPageState extends State<SignUpPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(
-            Icons.person_add_alt_1, // Ikon tambah user
+            Icons.person_add_alt_1,
             size: 64,
             color: Colors.white,
           ),
@@ -175,7 +184,7 @@ class _SignUpPageState extends State<SignUpPage> {
               ),
               GestureDetector(
                 onTap: () {
-                  Navigator.pop(context); // Kembali ke halaman login
+                  Navigator.pop(context);
                 },
                 child: const Text(
                   'Masuk Sekarang',
@@ -202,7 +211,6 @@ class _SignUpPageState extends State<SignUpPage> {
         width: double.infinity,
         height: double.infinity,
         decoration: BoxDecoration(
-          // MENGGUNAKAN GAMBAR BACKGROUND DARI ASET LOKAL
           image: DecorationImage(
             image: const AssetImage('assets/bg_cafe.jpg'),
             fit: BoxFit.cover,

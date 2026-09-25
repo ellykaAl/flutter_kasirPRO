@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dart:async'; // Untuk fungsi Timer durasi
+import 'dart:async';
 import 'user_model.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -50,7 +50,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   void dispose() {
-    _timer.cancel(); // Matikan timer saat keluar dari halaman
+    // Matikan timer saat keluar dari halaman untuk mencegah memory leak
+    _timer.cancel(); 
     super.dispose();
   }
 
@@ -74,9 +75,9 @@ class _ProfilePageState extends State<ProfilePage> {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [
@@ -109,7 +110,10 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profil Kasir', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Profil Kasir', 
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
         backgroundColor: const Color(0xFF0F172A),
         iconTheme: const IconThemeData(color: Colors.white),
         elevation: 0,
@@ -123,7 +127,7 @@ class _ProfilePageState extends State<ProfilePage> {
             image: const AssetImage('assets/bg_cafe.jpg'),
             fit: BoxFit.cover,
             colorFilter: ColorFilter.mode(
-              Colors.black.withOpacity(0.6), // Sedikit lebih gelap agar card menonjol
+              Colors.black.withValues(alpha: 0.6), // Diperbarui ke withValues
               BlendMode.darken,
             ),
           ),
@@ -134,11 +138,11 @@ class _ProfilePageState extends State<ProfilePage> {
             child: Container(
               constraints: const BoxConstraints(maxWidth: 600),
               decoration: BoxDecoration(
-                color: Colors.white, // Warna dasar card putih
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
+                    color: Colors.black.withValues(alpha: 0.2), // Diperbarui ke withValues
                     blurRadius: 15,
                     offset: const Offset(0, 5),
                   ),
@@ -157,7 +161,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                     child: CircleAvatar(
                       radius: 50,
-                      backgroundColor: const Color(0xFF0F172A).withOpacity(0.1),
+                      backgroundColor: const Color(0xFF0F172A).withValues(alpha: 0.1),
                       backgroundImage: AssetImage(widget.user.imageAsset),
                     ),
                   ),
@@ -166,18 +170,25 @@ class _ProfilePageState extends State<ProfilePage> {
                   // NAMA DAN ROLE
                   Text(
                     widget.user.nama,
-                    style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                    style: const TextStyle(
+                      fontSize: 26, 
+                      fontWeight: FontWeight.bold, 
+                      color: Color(0xFF0F172A),
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0F172A).withOpacity(0.1),
+                      color: const Color(0xFF0F172A).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
                       widget.user.role,
-                      style: const TextStyle(color: Color(0xFF0F172A), fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        color: Color(0xFF0F172A), 
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -195,10 +206,17 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                       child: const Icon(Icons.person, color: Color(0xFF0F172A)),
                     ),
-                    title: const Text('Username ID', style: TextStyle(fontSize: 13, color: Colors.grey)),
+                    title: const Text(
+                      'Username ID', 
+                      style: TextStyle(fontSize: 13, color: Colors.grey),
+                    ),
                     subtitle: Text(
                       widget.user.username,
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
+                      style: const TextStyle(
+                        fontSize: 16, 
+                        fontWeight: FontWeight.bold, 
+                        color: Colors.black87,
+                      ),
                     ),
                   ),
                   
@@ -210,7 +228,11 @@ class _ProfilePageState extends State<ProfilePage> {
                     alignment: Alignment.centerLeft,
                     child: Text(
                       'Manajemen Shift',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                      style: TextStyle(
+                        fontSize: 18, 
+                        fontWeight: FontWeight.bold, 
+                        color: Color(0xFF0F172A),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),

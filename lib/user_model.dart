@@ -14,7 +14,7 @@ class UserAccount {
   });
 }
 
-// Data Dummy awal
+// Data Dummy awal (Berfungsi sebagai simulasi database)
 List<UserAccount> dummyUsers = [
   UserAccount(
     username: 'kasir1',
@@ -23,4 +23,11 @@ List<UserAccount> dummyUsers = [
     role: 'Kasir Utama',
     imageAsset: 'assets/profile.jpg',
   ),
+  UserAccount(
+    username: 'kasir2',
+    password: '123',
+    nama: 'Bahtiar',
+    role: 'kasir Cadangan',
+    imageAsset: 'assets/profile2.jpg',
+  )
 ];

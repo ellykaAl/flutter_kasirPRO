@@ -70,10 +70,13 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  // Dialog Konfirmasi Pembayaran
   void _processPayment() {
+    final messenger = ScaffoldMessenger.of(context);
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Konfirmasi Pembayaran'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -91,14 +94,14 @@ class _HomePageState extends State<HomePage> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Batal'),
           ),
           ElevatedButton(
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
               _resetOrder();
-              ScaffoldMessenger.of(context).showSnackBar(
+              messenger.showSnackBar(
                 const SnackBar(
                   content: Text('Pembayaran Berhasil!'),
                   backgroundColor: Colors.green,
@@ -116,6 +119,36 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // Dialog Konfirmasi Logout
+  void _confirmLogout() {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Konfirmasi Logout'),
+        content: const Text('Apakah Anda yakin ingin mengakhiri shift dan keluar?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Batal'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const LoginPage()),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+            ),
+            child: const Text('Keluar', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -125,16 +158,13 @@ class _HomePageState extends State<HomePage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh, color: Colors.white),
+            tooltip: 'Reset Pesanan',
             onPressed: _resetOrder,
           ),
           IconButton(
             icon: const Icon(Icons.logout, color: Colors.white),
-            onPressed: () {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const LoginPage()),
-              );
-            },
+            tooltip: 'Logout',
+            onPressed: _confirmLogout,
           ),
         ],
       ),
@@ -163,7 +193,7 @@ class _HomePageState extends State<HomePage> {
                       children: [
                         CircleAvatar(
                           radius: 16,
-                          backgroundColor: const Color(0xFF0F172A).withOpacity(0.1),
+                          backgroundColor: const Color(0xFF0F172A).withValues(alpha: 0.1),
                           backgroundImage: AssetImage(widget.user.imageAsset),
                         ),
                         const SizedBox(width: 10),
@@ -250,7 +280,7 @@ class _HomePageState extends State<HomePage> {
                               return Container(
                                 width: 52,
                                 height: 52,
-                                color: const Color(0xFF0F172A).withOpacity(0.1),
+                                color: const Color(0xFF0F172A).withValues(alpha: 0.1),
                                 child: const Icon(Icons.fastfood, color: Color(0xFF0F172A)),
                               );
                             },
@@ -297,7 +327,11 @@ class _HomePageState extends State<HomePage> {
         decoration: BoxDecoration(
           color: Colors.white,
           boxShadow: [
-            BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 10, offset: const Offset(0, -4)),
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.06),
+              blurRadius: 10,
+              offset: const Offset(0, -4),
+            ),
           ],
         ),
         child: SafeArea(

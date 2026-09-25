@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'user_model.dart';
 import 'home.dart';
+import 'signup.dart'; // Import halaman daftar/register
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -18,11 +19,12 @@ class _LoginPageState extends State<LoginPage> {
     final String username = _usernameController.text.trim();
     final String password = _passwordController.text.trim();
 
+    // Cek jika inputan kosong
     if (username.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Username dan Password tidak boleh kosong!'),
-          backgroundColor: Colors.red,
+          backgroundColor: Colors.redAccent,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -41,11 +43,11 @@ class _LoginPageState extends State<LoginPage> {
         MaterialPageRoute(builder: (context) => HomePage(user: user)),
       );
     } catch (e) {
-      // Jika tidak ditemukan (error firstWhere)
+      // Jika tidak ditemukan (firstWhere melempar StateError)
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Username atau Password salah!'),
-          backgroundColor: Colors.red,
+          backgroundColor: Colors.redAccent,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -54,6 +56,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void dispose() {
+    // Pastikan controller di-dispose untuk menghindari memory leak
     _usernameController.dispose();
     _passwordController.dispose();
     super.dispose();
@@ -205,6 +208,36 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                       ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Tautan ke Halaman Register/Daftar
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          'Belum punya akun? ',
+                          style: TextStyle(color: Colors.black87),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const SignUpPage(),
+                              ),
+                            );
+                          },
+                          child: const Text(
+                            'Daftar Sekarang',
+                            style: TextStyle(
+                              color: Color(0xFF0F172A),
+                              fontWeight: FontWeight.bold,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
