@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'user_model.dart';
+import 'models/user_model.dart';
 
 class ProfilePage extends StatefulWidget {
   final UserAccount user;

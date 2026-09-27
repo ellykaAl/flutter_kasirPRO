@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'user_model.dart';
 import 'login.dart';
 import 'profile_page.dart';
+import 'models/user_model.dart';
 
 class Product {
   final String id;

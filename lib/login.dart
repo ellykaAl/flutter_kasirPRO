@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'user_model.dart';
 import 'home.dart';
 import 'signup.dart'; // Import halaman daftar/register
+import 'models/user_model.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
