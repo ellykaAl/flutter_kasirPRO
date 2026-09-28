@@ -249,70 +249,72 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
 
-          // List Produk dengan Gambar Asset
+          // List Produk Menggunakan ListView.builder
           Expanded(
-            child: ListView.separated(
+            child: ListView.builder(
               padding: const EdgeInsets.all(12),
               itemCount: _filteredProducts.length,
-              separatorBuilder: (context, index) => const SizedBox(height: 8),
               itemBuilder: (context, index) {
                 final product = _filteredProducts[index];
-                return Card(
-                  elevation: 0,
-                  color: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    side: BorderSide(color: Colors.grey.shade200),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Row(
-                      children: [
-                        // WIDGET GAMBAR DARI ASSET
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.asset(
-                            product.imageAsset,
-                            width: 52,
-                            height: 52,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                width: 52,
-                                height: 52,
-                                color: const Color(0xFF0F172A).withValues(alpha: 0.1),
-                                child: const Icon(Icons.fastfood, color: Color(0xFF0F172A)),
-                              );
-                            },
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Card(
+                    elevation: 0,
+                    color: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      side: BorderSide(color: Colors.grey.shade200),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Row(
+                        children: [
+                          // WIDGET GAMBAR DARI ASSET
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.asset(
+                              product.imageAsset,
+                              width: 52,
+                              height: 52,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  width: 52,
+                                  height: 52,
+                                  color: const Color(0xFF0F172A).withValues(alpha: 0.1),
+                                  child: const Icon(Icons.fastfood, color: Color(0xFF0F172A)),
+                                );
+                              },
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(product.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                                const SizedBox(height: 2),
+                                Text(_formatRupiah(product.price), style: TextStyle(color: Colors.grey.shade700, fontSize: 13)),
+                              ],
+                            ),
+                          ),
+                          Row(
                             children: [
-                              Text(product.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                              const SizedBox(height: 2),
-                              Text(_formatRupiah(product.price), style: TextStyle(color: Colors.grey.shade700, fontSize: 13)),
+                              IconButton(
+                                onPressed: () => _decrementQty(product),
+                                icon: const Icon(Icons.remove_circle_outline),
+                                color: product.quantity > 0 ? Colors.redAccent : Colors.grey.shade400,
+                              ),
+                              Text('${product.quantity}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                              IconButton(
+                                onPressed: () => _incrementQty(product),
+                                icon: const Icon(Icons.add_circle_outline),
+                                color: const Color(0xFF0F172A),
+                              ),
                             ],
                           ),
-                        ),
-                        Row(
-                          children: [
-                            IconButton(
-                              onPressed: () => _decrementQty(product),
-                              icon: const Icon(Icons.remove_circle_outline),
-                              color: product.quantity > 0 ? Colors.redAccent : Colors.grey.shade400,
-                            ),
-                            Text('${product.quantity}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                            IconButton(
-                              onPressed: () => _incrementQty(product),
-                              icon: const Icon(Icons.add_circle_outline),
-                              color: const Color(0xFF0F172A),
-                            ),
-                          ],
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 );
