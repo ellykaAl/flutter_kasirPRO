@@ -70,9 +70,130 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  // Helper Garis Putus-putus Struk
+  Widget _buildDashedLine() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Text(
+        '----------------------------------------',
+        style: TextStyle(color: Colors.grey.shade400, letterSpacing: 2),
+        maxLines: 1,
+        overflow: TextOverflow.clip,
+      ),
+    );
+  }
+
+  // Dialog Tampilan Struk Pembayaran Kasir
+  void _showReceiptDialog(List<Product> purchasedItems, int totalAmount) {
+    final now = DateTime.now();
+    final formattedDate =
+        "${now.day.toString().padLeft(2, '0')}/${now.month.toString().padLeft(2, '0')}/${now.year} ${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}";
+
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Wajib tekan tombol Transaksi Selesai
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        contentPadding: const EdgeInsets.all(20),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.receipt_long_rounded, size: 48, color: Color(0xFF0F172A)),
+            const SizedBox(height: 8),
+            const Text(
+              'MESIN KASIR CAFE',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, letterSpacing: 1),
+            ),
+            const Text('Jl. Raya No. 123, Surabaya', style: TextStyle(fontSize: 11, color: Colors.grey)),
+            _buildDashedLine(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('Tgl: $formattedDate', style: const TextStyle(fontSize: 11)),
+                Text('Kasir: ${widget.user.nama}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+              ],
+            ),
+            _buildDashedLine(),
+
+            // Rincian Item yang Dibeli
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 200),
+              child: SingleChildScrollView(
+                child: Column(
+                  children: purchasedItems.map((item) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(item.name, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                                Text('${item.quantity}x @ ${_formatRupiah(item.price)}',
+                                    style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
+                              ],
+                            ),
+                          ),
+                          Text(_formatRupiah(item.price * item.quantity),
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
+
+            _buildDashedLine(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('TOTAL BAYAR', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                Text(_formatRupiah(totalAmount),
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF0F172A))),
+              ],
+            ),
+            _buildDashedLine(),
+            const SizedBox(height: 8),
+            const Text('*** TERIMA KASIH ***',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+          ],
+        ),
+        actions: [
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              icon: const Icon(Icons.check_circle_outline, color: Colors.white),
+              label: const Text('TRANSAKSI SELESAI', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF0F172A),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                _resetOrder(); // Reset pesanan setelah cetak/lihat struk selesai
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Pembayaran & Transaksi Berhasil!'),
+                    backgroundColor: Colors.green,
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   // Dialog Konfirmasi Pembayaran
   void _processPayment() {
-    final messenger = ScaffoldMessenger.of(context);
+    final purchasedItems = _products.where((p) => p.quantity > 0).toList();
+    final totalPay = _totalPrice;
 
     showDialog(
       context: context,
@@ -85,7 +206,7 @@ class _HomePageState extends State<HomePage> {
             Text('Kasir: ${widget.user.nama}'),
             const SizedBox(height: 8),
             Text(
-              'Total: ${_formatRupiah(_totalPrice)}',
+              'Total: ${_formatRupiah(totalPay)}',
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             const SizedBox(height: 12),
@@ -99,15 +220,8 @@ class _HomePageState extends State<HomePage> {
           ),
           ElevatedButton(
             onPressed: () {
-              Navigator.pop(dialogContext);
-              _resetOrder();
-              messenger.showSnackBar(
-                const SnackBar(
-                  content: Text('Pembayaran Berhasil!'),
-                  backgroundColor: Colors.green,
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
+              Navigator.pop(dialogContext); // Tutup konfirmasi dialog
+              _showReceiptDialog(purchasedItems, totalPay); // Tampilkan Struk
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF0F172A),
