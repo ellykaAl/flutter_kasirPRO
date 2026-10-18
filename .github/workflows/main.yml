@@ -1,0 +1,56 @@
+name: Deploy Flutter Web to GitHub Pages
+
+# Workflow akan berjalan setiap kali ada push ke branch 'main'
+on:
+  push:
+    branches:
+      - main # Ubah ke 'master' jika branch utamamu bernama master
+
+# Memberikan izin yang diperlukan untuk men-deploy ke GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Memastikan hanya satu proses deploy yang berjalan pada satu waktu
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Mengambil kode dari repositori
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Mengatur environment Flutter
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      # 3. Mengunduh semua dependencies (package)
+      - name: Install dependencies
+        run: flutter pub get
+
+      # 4. Build aplikasi Flutter ke Web
+      # PENTING: --base-href harus sama persis dengan nama repositori GitHub kamu!
+      - name: Build Web
+        run: flutter build web --base-href "/flutter_kasirPRO/"
+
+      # 5. Mengunggah folder hasil build ke GitHub Actions
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './build/web'
+
+      # 6. Men-deploy artifact tersebut ke GitHub Pages
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
